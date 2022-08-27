@@ -1,0 +1,17 @@
+{
+  "domain": "bm_feed",
+  "name": "BrandMeister Event Feed",
+  "documentation": "https://github.com/majkrzak/bm_feed",
+  "dependencies": [],
+  "codeowners": [
+    "@majkrzak"
+  ],
+  "requirements": [
+    "python-socketio[asyncio_client]"
+  ],
+  "iot_class": "cloud_polling",
+  "loggers": [
+    "socketio.client",
+    "engineio.client"
+  ]
+}
