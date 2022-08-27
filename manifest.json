@@ -1,5 +1,6 @@
 {
   "domain": "bm_feed",
+  "version": "0.0.0",
   "name": "BrandMeister Event Feed",
   "documentation": "https://github.com/majkrzak/bm_feed",
   "dependencies": [],
