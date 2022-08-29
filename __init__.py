@@ -42,7 +42,7 @@ class Trigger:
 async def async_setup(hass: HomeAssistant, config: dict):
     triggers = (
         [Trigger(trigger) for trigger in config[DOMAIN]["triggers"]]
-        if config[DOMAIN]["triggers"]
+        if "triggers" in config[DOMAIN]
         else None
     )
 
@@ -83,5 +83,5 @@ async def async_setup(hass: HomeAssistant, config: dict):
                         f"{DOMAIN}/{event[0]}", {**event[1], "triggers": triggered}
                     )
 
-    hass.async_create_task(sio.wait())
+    hass.loop.create_task(sio.wait())
     return True
