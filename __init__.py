@@ -1,4 +1,5 @@
 """BrandMeister Event Feed"""
+from homeassistant.components.bm_feed.trigger import Trigger
 from homeassistant.core import HomeAssistant
 from socketio import AsyncClient
 from json import loads as json_loads
@@ -6,42 +7,9 @@ from json import loads as json_loads
 DOMAIN = "bm_feed"
 
 
-class Trigger:
-    query: str
-
-    def __init__(self, query: str):
-        self.query = query
-
-    def __call__(self, event: dict):
-        if self.query[0] == "<":
-            if self.query[1] == "#":
-                if self.query[2:] == event["caller"]["id"]:
-                    return True
-            else:
-                if self.query[1:] == event["caller"]["callsign"]:
-                    return True
-        elif self.query[0] == ">":
-            if self.query[1] == "@":
-                if self.query[2] == "#":
-                    if self.query[3:] == event["callee"]["id"]:
-                        return True
-            else:
-                if self.query[1] == "#":
-                    if self.query[2:] == event["callee"]["id"]:
-                        return True
-                else:
-                    if self.query[1:] == event["callee"]["callsign"]:
-                        return True
-
-        return False
-
-    def __str__(self):
-        return self.query
-
-
 async def async_setup(hass: HomeAssistant, config: dict):
     triggers = (
-        [Trigger(trigger) for trigger in config[DOMAIN]["triggers"]]
+        [Trigger(query) for query in config[DOMAIN]["triggers"]]
         if "triggers" in config[DOMAIN]
         else None
     )
@@ -63,12 +31,12 @@ async def async_setup(hass: HomeAssistant, config: dict):
                     "call",
                     {
                         "caller": {
-                            "id": payload["SourceID"],
-                            "callsign": payload["SourceCall"],
+                            "id": int(payload["SourceID"]),
+                            "callsign": str(payload["SourceCall"]),
                         },
                         "callee": {
-                            "id": payload["DestinationID"],
-                            "callsign": payload["DestinationCall"],
+                            "id": int(payload["DestinationID"]),
+                            "callsign": str(payload["DestinationCall"]),
                             "is_group": "Group" in payload["CallTypes"],
                         },
                     },

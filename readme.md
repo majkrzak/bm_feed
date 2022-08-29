@@ -22,8 +22,16 @@ bm_feed:
     - "<#12345" # Capture all calls from ID 12345
 ```
 
+Simple LALR grammar is provided, which allows to combine filters by using "and" `&`, "or" `|` and "not" `!` operators together with "parentheses" `()`.
+The last is required as all operators have same precedence.
+
+```yaml
+">MYCALL&!(<YMCALL|<#12345)" # Capture all calls to MYCALL and not from YMCALL or ID 12345 
+```
+
 
 ## TODO
+
 - Replace dictionary mayhem with more sophisticated type and logic system.
 - Add sensors or different entities representing filter results.
 - Create config flow.
