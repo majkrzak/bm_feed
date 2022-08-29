@@ -1,5 +1,5 @@
 """BrandMeister Event Feed"""
-from homeassistant.components.bm_feed.trigger import Trigger
+from .trigger import Trigger
 from homeassistant.core import HomeAssistant
 from socketio import AsyncClient
 from json import loads as json_loads
