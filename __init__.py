@@ -1,8 +1,12 @@
 """BrandMeister Event Feed"""
-from .trigger import Trigger
-from homeassistant.core import HomeAssistant
-from socketio import AsyncClient
+from dataclasses import asdict
 from json import loads as json_loads
+
+from socketio import AsyncClient
+
+from homeassistant.core import HomeAssistant
+from .data import Callee, Caller, Call
+from .trigger import Trigger
 
 DOMAIN = "bm_feed"
 
@@ -29,17 +33,17 @@ async def async_setup(hass: HomeAssistant, config: dict):
             if payload["Event"] == "Session-Start" and "Call" in payload["CallTypes"]:
                 event = (
                     "call",
-                    {
-                        "caller": {
-                            "id": int(payload["SourceID"]),
-                            "callsign": str(payload["SourceCall"]),
-                        },
-                        "callee": {
-                            "id": int(payload["DestinationID"]),
-                            "callsign": str(payload["DestinationCall"]),
-                            "is_group": "Group" in payload["CallTypes"],
-                        },
-                    },
+                    Call(
+                        Caller(
+                            int(payload["SourceID"]),
+                            str(payload["SourceCall"]),
+                        ),
+                        Callee(
+                            int(payload["DestinationID"]),
+                            str(payload["DestinationCall"]),
+                            "Group" in payload["CallTypes"],
+                        ),
+                    ),
                 )
         if event:
             if triggers is None:
@@ -48,7 +52,8 @@ async def async_setup(hass: HomeAssistant, config: dict):
                 triggered = [str(trigger) for trigger in triggers if trigger(event[1])]
                 if triggered:
                     hass.bus.async_fire(
-                        f"{DOMAIN}/{event[0]}", {**event[1], "triggers": triggered}
+                        f"{DOMAIN}/{event[0]}",
+                        {**asdict(event[1]), "triggers": triggered},
                     )
 
     hass.loop.create_task(sio.wait())

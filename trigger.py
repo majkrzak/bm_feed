@@ -1,6 +1,8 @@
-from typing import Callable
+from typing import Callable, cast
 
 from lark import Lark, Transformer, v_args
+
+from .data import Call
 
 PARSER = Lark(
     r"""
@@ -32,22 +34,12 @@ PARSER = Lark(
                 "or": staticmethod(lambda lhs, rhs: lambda x: lhs(x) or rhs(x)),
                 "and": staticmethod(lambda lhs, rhs: lambda x: lhs(x) and rhs(x)),
                 "not": staticmethod(lambda rhs: lambda x: not rhs(x)),
-                "caller": staticmethod(lambda rhs: lambda x: rhs(x["caller"])),
-                "callee": staticmethod(lambda rhs: lambda x: rhs(x["callee"])),
-                "private": staticmethod(
-                    lambda rhs: lambda x: rhs(x)
-                    if ("is_group" not in x or not x["is_group"])
-                    else False
-                ),
-                "group": staticmethod(
-                    lambda rhs: lambda x: rhs(x)
-                    if ("is_group" in x and x["is_group"])
-                    else False
-                ),
-                "callsign": staticmethod(
-                    lambda rhs: lambda x: x["callsign"] == str(rhs)
-                ),
-                "id": staticmethod(lambda rhs: lambda x: x["id"] == int(rhs)),
+                "caller": staticmethod(lambda rhs: lambda x: rhs(x.caller)),
+                "callee": staticmethod(lambda rhs: lambda x: rhs(x.callee)),
+                "private": staticmethod(lambda rhs: lambda x: rhs(x)),
+                "group": staticmethod(lambda rhs: lambda x: x.is_group and rhs(x)),
+                "callsign": staticmethod(lambda rhs: lambda x: x.callsign == rhs),
+                "id": staticmethod(lambda rhs: lambda x: x.id == int(rhs)),
             },
         )
     )(),
@@ -56,13 +48,13 @@ PARSER = Lark(
 
 class Trigger:
     query: str
-    kernel: Callable[[dict], bool]
+    kernel: Callable[[Call], bool]
 
     def __init__(self, query):
         self.query = query
-        self.kernel = PARSER.parse(query)
+        self.kernel = cast(Callable[[Call], bool], PARSER.parse(query))
 
-    def __call__(self, event: dict):
+    def __call__(self, event: Call):
         return self.kernel(event)
 
     def __str__(self):
