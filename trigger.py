@@ -36,7 +36,7 @@ PARSER = Lark(
                 "not": staticmethod(lambda rhs: lambda x: not rhs(x)),
                 "caller": staticmethod(lambda rhs: lambda x: rhs(x.caller)),
                 "callee": staticmethod(lambda rhs: lambda x: rhs(x.callee)),
-                "private": staticmethod(lambda rhs: lambda x: rhs(x)),
+                "private": staticmethod(lambda rhs: lambda x: not x.is_group and rhs(x)),
                 "group": staticmethod(lambda rhs: lambda x: x.is_group and rhs(x)),
                 "callsign": staticmethod(lambda rhs: lambda x: x.callsign == rhs),
                 "id": staticmethod(lambda rhs: lambda x: x.id == int(rhs)),

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class Caller:
     id: int
     callsign: str
+    is_group: bool = False
 
 
 @dataclass
