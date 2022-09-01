@@ -11,14 +11,13 @@ from .trigger import Trigger
 
 DOMAIN = "bm_feed"
 
-sio = None
-
 
 async def async_setup(hass: HomeAssistant, config: dict):
-    global sio
+    if DOMAIN in hass.data:
+        sio = hass.data[DOMAIN]
 
-    if not sio:
-        sio = AsyncClient()
+    else:
+        hass.data[DOMAIN] = sio = AsyncClient()
 
         async def setup():
             await sio.connect(
