@@ -4,25 +4,42 @@ from json import loads as json_loads
 
 from socketio import AsyncClient
 
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import HomeAssistant
 from .data import Callee, Caller, Call
 from .trigger import Trigger
 
 DOMAIN = "bm_feed"
 
+sio = None
+
 
 async def async_setup(hass: HomeAssistant, config: dict):
+    global sio
+
+    if not sio:
+        sio = AsyncClient()
+
+        async def setup():
+            await sio.connect(
+                url="https://api.brandmeister.network",
+                socketio_path="lh/socket.io",
+                transports="websocket",
+            )
+            await sio.wait()
+
+        task = hass.loop.create_task(setup())
+
+        async def teardown():
+            await sio.disconnect()
+            await task
+
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, teardown())
+
     triggers = (
         [Trigger(query) for query in config[DOMAIN]["triggers"]]
         if "triggers" in config[DOMAIN]
         else None
-    )
-
-    sio = AsyncClient()
-    await sio.connect(
-        url="https://api.brandmeister.network",
-        socketio_path="lh/socket.io",
-        transports="websocket",
     )
 
     @sio.on("mqtt")
@@ -56,5 +73,4 @@ async def async_setup(hass: HomeAssistant, config: dict):
                         {**asdict(event[1]), "triggers": triggered},
                     )
 
-    hass.loop.create_task(sio.wait())
     return True
