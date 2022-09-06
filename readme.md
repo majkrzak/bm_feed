@@ -48,7 +48,7 @@ action:
     data:
       title: BrandMeister Call
       message: >
-        {% for t in trigger.event.data.triggers %}{{ t }}{{ " " }}{% endfor %}
+        {% for t in trigger.event.data.triggers %}{{ t|e }}{{ " " }}{% endfor %}
 
         {{ trigger.event.data.caller.callsign }}({{
         trigger.event.data.caller.id}}) to {{ trigger.event.data.callee.callsign
