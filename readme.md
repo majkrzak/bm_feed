@@ -1,6 +1,6 @@
 # "BrandMeister Event Feed"
 
-Home Assistant component for accessing feed of BrandMeister events.
+[Home Assistant](https://www.home-assistant.io/) component for accessing feed of [BrandMeister](https://brandmeister.network/) events.
 
 
 ## Installation
@@ -32,7 +32,7 @@ The last is required as all operators have same precedence.
 
 ## Notifications
 
-To create notification, for example on the mobile phone, the `notify` platform can be used.
+To create notification, for example on the mobile phone, the `notify` platform can be used. ([See details](https://companion.home-assistant.io/docs/notifications/notifications-basic/))
 Following automation will create notification containing information about fired triggers and call.
 
 ```yaml
@@ -54,6 +54,10 @@ action:
         trigger.event.data.caller.id}}) to {{ trigger.event.data.callee.callsign
         }}({% if trigger.event.data.callee.is_group %}TG{% endif %}{{
         trigger.event.data.callee.id }})
+      data:
+        notification_icon: "mdi:radio-handheld"
+        when: {{ now().strftime('%s') }}
+        group: "BrandMeister"
 mode: single
 ```
 
