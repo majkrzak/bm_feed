@@ -46,7 +46,16 @@ async def async_setup(hass: HomeAssistant, config: dict):
         event = None
         if data["topic"] == "LH":
             payload = json_loads(data["payload"])
-            if payload["Event"] == "Session-Start" and "Call" in payload["CallTypes"]:
+            if (
+                payload["Event"] == "Session-Stop"
+                and "Call" in payload["CallTypes"]
+                and (
+                    payload["LinkCall"]
+                    + payload["SourceCall"]
+                    + payload["DestinationCall"]
+                )
+                != ""
+            ):
                 event = (
                     "call",
                     Call(
